@@ -1,15 +1,13 @@
 import React, { useCallback } from "react";
 import {
-  View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Image,
-  Dimensions,
+  useWindowDimensions,
+  Platform,
 } from "react-native";
 import { VideoItem } from "../types/video";
-
-const { width } = Dimensions.get("window");
 
 type Props = {
   item: VideoItem;
@@ -17,13 +15,17 @@ type Props = {
 };
 
 export const VideoCard = React.memo(({ item, onPress }: Props) => {
-  const handlePress = useCallback(() => {
-    onPress(item);
-  }, [item, onPress]);
+  const { width } = useWindowDimensions();
+  const isWeb = Platform.OS === "web";
+
+  const cardWidth = isWeb ? 360 : Math.min(320, Math.floor(width * 0.72));
+  const thumbHeight = isWeb ? 200 : 160;
+
+  const handlePress = useCallback(() => onPress(item), [item, onPress]);
 
   return (
-    <TouchableOpacity onPress={handlePress} style={styles.card}>
-      <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+    <TouchableOpacity onPress={handlePress} style={[styles.card, { width: cardWidth }]}>
+      <Image source={{ uri: item.thumbnail }} style={[styles.thumbnail, { height: thumbHeight }]} />
       <Text numberOfLines={2} style={styles.title}>
         {item.title}
       </Text>
@@ -33,18 +35,17 @@ export const VideoCard = React.memo(({ item, onPress }: Props) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: width * 0.6,
-    marginLeft: 16,
+    marginRight: 16,
   },
   thumbnail: {
     width: "100%",
-    height: 140,
-    borderRadius: 8,
+    borderRadius: 12,
     backgroundColor: "#222",
   },
   title: {
     color: "#EDEDED",
     fontSize: 14,
-    marginTop: 8,
+    marginTop: 10,
+    lineHeight: 18,
   },
 });
